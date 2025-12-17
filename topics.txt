@@ -1,5 +1,3 @@
-Why Chatbots are a Dead End for Complex Tasks
-Generative UI vs Component Libraries
 The Rise of Disposable Interfaces
 Spatial Computing and AI
 Gemini's Multimodal Capabilities in UX
