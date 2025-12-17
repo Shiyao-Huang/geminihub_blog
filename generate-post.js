@@ -6,8 +6,11 @@ import 'dotenv/config';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
-const MODEL_NAME = 'gemini-2.5-flash'; // Confirmed in list
-
+const MODEL_NAME = 'gemini-3-pro-preview-thinking-low-count'; // New powerful model
+// Heuristic: If key starts with 'sk-', it's likely an OpenAI-compatible proxy (like OneAPI)
+// If it starts with 'AIza', it's Google.
+const IS_OPENAI_COMPATIBLE = GEMINI_API_KEY.startsWith('sk-');
+const BASE_URL = process.env.GEMINI_BASE_URL || (IS_OPENAI_COMPATIBLE ? 'https://tokencount.aigemini.org/v1' : 'https://generativelanguage.googleapis.com/v1beta');
 
 if (!GEMINI_API_KEY) {
     console.error('❌ Error: GEMINI_API_KEY environment variable is not set.');
@@ -38,8 +41,9 @@ if (!topic) {
     process.exit(1);
 }
 
+
 async function generatePost(topic) {
-    console.log(`🤖 Consulting Gemini about: "${topic}"...`);
+    console.log(`🤖 Consulting Gemini (${MODEL_NAME}) about: "${topic}"...`);
 
     const prompt = `
   You are an expert technical content writer for a blog about "Generative UI", "AI User Experience", and "Gemini/LLM Technology".
@@ -50,7 +54,7 @@ async function generatePost(topic) {
   1.  **Frontmatter**: Must be a valid YAML frontmatter at the top.
       - title: Catchy, SEO-friendly title.
       - description: 150-160 chars meta description.
-      - pubDate: Today's date (YYYY-MM-DD).
+      - pubDate: Today's date (ISO 8601 string, e.g. "2023-10-27T12:00:00.000Z"). MUST be quoted.
       - heroImage: "../../assets/blog-placeholder-1.jpg" (Use this exact path).
   2.  **Structure**:
       - Introduction (Hook the reader).
@@ -65,25 +69,43 @@ async function generatePost(topic) {
   `;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
-            })
-        });
+        let response;
+        if (IS_OPENAI_COMPATIBLE) {
+            // OpenAI Compatible Endpoint (e.g. OneAPI / NewAPI)
+            response = await fetch(`${BASE_URL}/chat/completions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${GEMINI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: MODEL_NAME,
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.7
+                })
+            });
+        } else {
+            // Native Google Endpoint
+            response = await fetch(`${BASE_URL}/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+        }
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error?.message || response.statusText);
+            throw new Error(error.error?.message || JSON.stringify(error) || response.statusText);
         }
 
         const data = await response.json();
-        let content = data.candidates[0].content.parts[0].text;
+        let content = '';
+
+        if (IS_OPENAI_COMPATIBLE) {
+            content = data.choices[0].message.content;
+        } else {
+            content = data.candidates[0].content.parts[0].text;
+        }
 
         // Clean up Markdown fences if Gemini adds them
         content = content.replace(/^```markdown\n/, '').replace(/^```\n/, '').replace(/\n```$/, '');
