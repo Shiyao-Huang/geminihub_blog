@@ -1,8 +1,8 @@
 ---
-title: The Human-AI Dance: Understanding the Psychology of AI-Native Interfaces
-description: Explore the psychological underpinnings of AI-native interfaces. Dive into trust, intuition, cognitive load, and agency to design future-proof generative UIs.
-pubDate: 2023-10-27
-heroImage: ../../assets/blog-placeholder-1.jpg
+title: "The Human-AI Dance: Understanding the Psychology of AI-Native Interfaces"
+description: "Explore the psychological underpinnings of AI-native interfaces. Dive into trust, intuition, cognitive load, and agency to design future-proof generative UIs."
+pubDate: "2023-10-27T12:00:00.000Z"
+heroImage: "../../assets/blog-placeholder-1.jpg"
 ---
 
 The landscape of user interfaces is undergoing a profound transformation. What was once a static set of buttons and predetermined pathways is evolving into a dynamic, adaptive, and often generative experience. This shift, spearheaded by Generative UI and AI User Experience, isn't just about new technologies; it's fundamentally about a new kind of interaction – a "human-AI dance." As AI takes a more active role in shaping our digital environments, understanding the psychology of AI-native interfaces becomes paramount. It's no longer enough to design for human usability; we must now design for human-AI symbiosis.

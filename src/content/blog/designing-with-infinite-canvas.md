@@ -1,8 +1,7 @@
-```yaml
 ---
 title: Designing with Infinite Canvas – The Limitless Future of AI User Experience
 description: Explore how infinite canvases are revolutionizing generative UI and AI UX. Uncover key design principles and how LLMs like Gemini empower boundless, intelligent design spaces.
-pubDate: "2023-10-27"
+pubDate: "2023-10-27T12:00:00.000Z"
 heroImage: "../../assets/blog-placeholder-1.jpg"
 ---
 
