@@ -1,0 +1,41 @@
+name: Daily Satellite Content
+
+on:
+  schedule:
+    # Run every day at 8:00 UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Daily Post
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npm run gen
+
+      - name: Build Site (Check for errors)
+        run: npm run build
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name 'GeminiHub Bot'
+          git config --global user.email 'bot@geminihub.ai'
+          git add src/content/blog/ topics.txt
+          git commit -m "🤖 Auto-generated post" || echo "No changes to commit"
+          git push
